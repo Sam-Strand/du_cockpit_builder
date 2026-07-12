@@ -1,0 +1,70 @@
+{
+    "core": {
+        "class": "CoreUnit"
+    },
+    "unit": {
+        "class": "Unit"
+    },
+    "construct": {
+        "class": "Construct"
+    },
+    "player": {
+        "class": "Player"
+    },
+    "system": {
+        "class": "System"
+    },
+    "antigrav": {
+        "class": "AntiGravityGeneratorUnit"
+    },
+    "warpdrive": {
+        "class": "WarpDriveUnit"
+    },
+    "shield": {
+        "class": "ShieldGeneratorUnit"
+    },
+    "weapon": {
+        "class": "WeaponUnit",
+        "select": "manual"
+    },
+    "radar": {
+        "class": "RadarPVPUnit",
+        "select": "manual"
+    },
+    "screens": {
+        "class": "ScreenUnit",
+        "select": "manual"
+    },
+    "dataBank": {
+        "class": "DataBankUnit",
+        "select": "manual"
+    },
+    "switch": {
+        "class": "ManualSwitchUnit",
+        "select": "manual"
+    },
+    "atmofueltank_1": {
+        "class": "FuelTankUnit",
+        "type": "atmosphere"
+    },
+    "spacefueltank_1": {
+        "class": "FuelTankUnit",
+        "type": "space"
+    },
+    "spacefueltank_2": {
+        "class": "FuelTankUnit",
+        "type": "space"
+    },
+    "spacefueltank_3": {
+        "class": "FuelTankUnit",
+        "type": "space"
+    },
+    "rocketfueltank_1": {
+        "class": "FuelTankUnit",
+        "type": "rocket"
+    },
+    "rocketfueltank_2": {
+        "class": "FuelTankUnit",
+        "type": "rocket"
+    }
+}
