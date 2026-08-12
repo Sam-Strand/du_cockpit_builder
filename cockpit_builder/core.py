@@ -30,7 +30,7 @@ class DUAutoconfBuilder:
         # Начинаем с дефолтных слотов
         self.config = {
             'name': self.project_path.name,
-            'slots': self.DEFAULT_SLOTS.copy(),  # Всегда есть базовые слоты
+            'slots': self.DEFAULT_SLOTS.copy(),
             'handlers': {}
         }
 
@@ -184,15 +184,18 @@ class DUAutoconfBuilder:
         if filename in simple_events:
             return (filename, [])
 
+        # Парсим с аргументами в скобках
         match = re.match(
-            r'^(onActionStart|onActionStop|onActionLoop|onTimer)\((.+)\)$', filename)
+            r'^(onActionStart|onActionStop|onActionLoop|onTimer|onInputText)\((.+)\)$', filename
+        )
         if match:
             event_name = match.group(1)
             args_str = match.group(2).strip()
             args = [a.strip() for a in args_str.split(',') if a.strip()]
             return (event_name, args)
 
-        if filename in ['onActionStart', 'onActionStop', 'onActionLoop', 'onTimer']:
+        # Если просто имя без скобок
+        if filename in ['onActionStart', 'onActionStop', 'onActionLoop', 'onInputText', 'onTimer']:
             return (filename, [])
 
         return None
@@ -208,31 +211,36 @@ class DUAutoconfBuilder:
             for event_name, handlers in events.items():
                 if len(handlers) == 1:
                     handler = handlers[0]
+                    handler_data = {
+                        'lua': LiteralScalarString(handler['code'].strip())
+                    }
+                    
+                    # Формируем ключ события
+                    event_key = event_name
+                    
+                    # Добавляем аргументы если они есть
                     if handler['args']:
-                        self.config['handlers'][slot_name][event_name] = {
-                            'args': handler['args'],
-                            'lua': handler['code'].strip()
-                        }
-                    else:
-                        self.config['handlers'][slot_name][event_name] = {
-                            'lua': handler['code'].strip()
-                        }
+                        event_key = event_key + '(' + ', '.join(handler['args']) + ')'
+                    
+                    self.config['handlers'][slot_name][event_key] = handler_data
                 else:
-                    combined_code = '\n'.join(
-                        h['code'].strip() for h in handlers)
+                    combined_code = '\n'.join(h['code'].strip() for h in handlers)
                     all_args = []
                     for h in handlers:
                         all_args.extend(h['args'])
-
+                    
+                    handler_data = {
+                        'lua': LiteralScalarString(combined_code)
+                    }
+                    
+                    # Формируем ключ события
+                    event_key = event_name
+                    
+                    # Добавляем аргументы если они есть
                     if all_args:
-                        self.config['handlers'][slot_name][event_name] = {
-                            'args': list(set(all_args)),
-                            'lua': combined_code
-                        }
-                    else:
-                        self.config['handlers'][slot_name][event_name] = {
-                            'lua': combined_code
-                        }
+                        event_key = event_key + '(' + ', '.join(set(all_args)) + ')'
+                    
+                    self.config['handlers'][slot_name][event_key] = handler_data
 
     def _convert_to_literal(self, obj):
         """Рекурсивно преобразует строки с \n в LiteralScalarString"""
@@ -261,7 +269,7 @@ class DUAutoconfBuilder:
         try:
             yaml = YAML()
             yaml.indent(mapping=2, sequence=4, offset=2)
-            yaml.width = 4096  # Ширина чтобы не было переносов
+            yaml.width = 4096
 
             with open(conf_file, 'w', encoding='utf-8') as f:
                 f.write(f'# Auto-generated config for {config_name}\n')
